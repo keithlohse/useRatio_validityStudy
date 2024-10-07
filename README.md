@@ -1,0 +1,2 @@
+# useRatio_validityStudy
+ Repository for analysis code from our study on the concurrent validity of the Use Ratio compared to the ARAT and FM UE in adults with stroke.  Data are available from NICHD DASH; see Miller, A. E. et al. A Large Harmonized Upper and Lower Limb Accelerometry Dataset: A Resource for Rehabilitation Scientists. medRxiv 2024.08.15.24312066 (2024) doi:10.1101/2024.08.15.24312066..
