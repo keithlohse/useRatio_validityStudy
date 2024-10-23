@@ -78,7 +78,7 @@ summary(STROKE$Chronicity)
 # chronicity is in years, multiply by 52.1 to get approximate weeks
 summary(STROKE$TimePoint)
 
-LONG <- STROKE %>% select(SubIDName, Chronicity, TimePoint, 
+LONG <- STROKE %>% select(SubIDName, Chronicity, TimePoint, StrokeType, 
                           AffARATTotal, UEFuglMeyer, 
                         use_ratio, par_time, non_time) %>%
   group_by(SubIDName, TimePoint) %>% # regroup by subject and then sort by ascending times
@@ -325,7 +325,7 @@ ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
   geom_abline(intercept = 0, slope=1, col="black", lwd=0.5)+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12))+
   scale_y_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -337,10 +337,10 @@ ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/Paretic_to_nonParetic_overTime_WIDE.jpeg",
+  filename="./outputs/Paretic_to_nonParetic_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -357,14 +357,15 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
-  geom_point(col="black", shape=21)+
-  #stat_smooth(method="lm", se=TRUE)+
+  geom_point(shape=21)+
+  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
   stat_poly_line() +
   stat_poly_eq() +
+  scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -376,10 +377,10 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/useRatio_ARAT_overTime_WIDE.jpeg",
+  filename="./outputs/useRatio_ARAT_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -395,7 +396,7 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -407,10 +408,10 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/paretic_ARAT_overTime_WIDE.jpeg",
+  filename="./outputs/paretic_ARAT_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -429,7 +430,7 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -444,8 +445,8 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
 ggsave(
   filename="./outputs/nonParetic_ARAT_overTime_WIDE.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -468,16 +469,17 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 
-
+summary(FIRST_DATA$use_ratio)
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
-  geom_point(col="black", shape=21)+
-  #stat_smooth(method="lm", se=TRUE)+
+  geom_point(shape=21)+
+  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
   stat_poly_line() +
-  stat_poly_eq(label.y="bottom", label.x="right") +
+  stat_poly_eq() +
+  scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -489,10 +491,10 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/useRatio_fuglMeyer_overTime_WIDE.jpeg",
+  filename="./outputs/useRatio_fuglMeyer_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -504,11 +506,11 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
   geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
   stat_poly_line() +
-  stat_poly_eq(label.y="bottom", label.x="right") +
+  stat_poly_eq() +
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -520,10 +522,10 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/paretic_fulgMeyer_overTime_WIDE.jpeg",
+  filename="./outputs/paretic_fulgMeyer_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
@@ -536,11 +538,11 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
   geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
   stat_poly_line() +
-  stat_poly_eq(label.y="bottom", label.x="right") +
+  stat_poly_eq() +
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
-  facet_wrap(~weeksCat, nrow=1)+
+  facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -552,13 +554,17 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
         legend.position = "bottom")
 
 ggsave(
-  filename="./outputs/nonParetic_fuglMeyer_overTime_WIDE.jpeg",
+  filename="./outputs/nonParetic_fuglMeyer_overTime.jpeg",
   plot = last_plot(),
-  width = 18,
-  height = 3,
+  width = 4,
+  height = 18,
   units = "in",
   dpi = 300
 )
+
+
+
+
 
 
 # Part 1: Demographic statistics for the overall cohort --------------------------------
@@ -1064,7 +1070,7 @@ ACUTE$invTime.3 <- (ACUTE$WeeksPostStroke+1)^-3
 plot(x=ACUTE$WeeksPostStroke, y=ACUTE$orthTime.1)
 summary(ACUTE$WeeksPostStroke)
 
-ACUTE$knot5 <- ifelse(ACUTE$WeeksPostStroke<5,
+ACUTE$knot05 <- ifelse(ACUTE$WeeksPostStroke<5,
                       0, # If time < k, put 0
                       ACUTE$WeeksPostStroke-5) # If time is >/=k, put time
 
@@ -1072,7 +1078,7 @@ ACUTE$knot11 <- ifelse(ACUTE$WeeksPostStroke<11,
                        0, # If time < k, put 0
                        ACUTE$WeeksPostStroke-11) # If time is >/=k, put time
 
-plot(x=ACUTE$WeeksPostStroke, y=ACUTE$knot5)
+plot(x=ACUTE$WeeksPostStroke, y=ACUTE$knot05)
 plot(x=ACUTE$WeeksPostStroke, y=ACUTE$knot11)
 
 
@@ -1164,8 +1170,43 @@ anova(int_mod_ARAT, lin_mod_ARAT, sq_mod_ARAT,
       spline_mod_ARAT)
 
 
+# negative exponential model 
+library(nlme)
+set.seed(100)
+negEx_mod_ARAT <- nlme(AffARATTotal ~ b_0i +
+                           (b_1i)*(exp(b_2i * WeeksPostStroke)),
+                         data = ACUTE,
+                         fixed = b_0i + b_1i + b_2i ~ 1,
+                         random = list(b_0i ~ 1, b_1i ~ 1, b_2i ~1),
+                         groups = ~ SubIDName,
+                         start = c(60, -60, -1),
+                         na.action = na.omit)
+
+summary(negEx_mod_ARAT)
+-2 * as.numeric(logLik(negEx_mod_ARAT))
+3467.8-3263.5
+pchisq(q=3467.8-3263.5, df=3, lower.tail=FALSE)
 
 
+# 3-parameter sigmoidal model
+sigmoid_model <- function(x, a, b, x0) {
+  a / (1 + exp(-b * (x - x0)))
+}
+
+sigmoid_mod_ARATmodel <- nlme(
+  model = AffARATTotal ~ a / (1 + exp(-b * (WeeksPostStroke - x0))),  # Nonlinear model formula (sigmoid)
+  data = ACUTE,                          # Your dataset
+  fixed = a + b + x0 ~ 1,                    # Fixed effects for the parameters
+  random = a + x0 ~ 1 | SubIDName,         # Random effects (allowing a, b, x0 to vary by subject)
+  start = c(a = 60, b = 1, x0 = 5),         # Starting values for a, b, and x0
+  na.action = na.omit,                       # Handling missing values by omitting rows with NAs
+  control = nlmeControl(maxIter = 200, msMaxIter = 200)  # Control iterations for fitting
+)
+
+summary(sigmoid_mod_ARATmodel)
+-2 * as.numeric(logLik(sigmoid_mod_ARATmodel))
+3467.8-3263.5
+pchisq(q=3467.8-3263.5, df=3, lower.tail=FALSE)
 
 
 
@@ -1249,6 +1290,24 @@ spline_mod_FM <-lmer(UEFuglMeyer~
                                       optCtrl=list(maxfun=5e5)))
 summary(spline_mod_FM)
 anova(int_mod_FM, lin_mod_FM, sq_mod_FM, cub_mod_FM, invSq_FM, invCube_FM, spline_mod_FM)
+
+
+# negative exponential model 
+set.seed(100)
+negEx_mod_FM <- nlme(UEFuglMeyer ~ b_0i +
+                         (b_1i)*(exp(b_2i * WeeksPostStroke)),
+                       data = ACUTE,
+                       fixed = b_0i + b_1i + b_2i ~ 1,
+                       random = list(b_0i ~ 1, b_1i ~ 1),
+                       groups = ~ SubIDName,
+                       start = c(70, -70, -1),
+                       na.action = na.omit)
+
+summary(negEx_mod_FM)
+-2 * as.numeric(logLik(negEx_mod_FM))
+2747.2-2564.951
+pchisq(q=3467.8-3263.5, df=3, lower.tail=FALSE)
+
 
 
 
@@ -1337,6 +1396,46 @@ anova(int_mod_UR, lin_mod_UR, sq_mod_UR, cub_mod_UR, invSq_UR, invCube_UR, splin
 
 
 
+
+# negative exponential model 
+set.seed(100)
+negEx_mod_UR <- nlme(use_ratio ~ b_0i +
+                         (b_1i)*(exp(b_2i * WeeksPostStroke)),
+                       data = ACUTE,
+                       fixed = b_0i + b_1i + b_2i ~ 1,
+                       random = list(b_0i ~ 1),
+                       groups = ~ SubIDName,
+                       start = c(1, -1, -0.5),
+                       na.action = na.omit,
+                     control = lmeControl(maxIter = 500, msMaxIter = 500))
+
+summary(negEx_mod_UR)
+-2 * as.numeric(logLik(negEx_mod_UR))
+-465.45--558.2836
+pchisq(q=-465.45--558.2836, df=1, lower.tail=FALSE)
+
+
+
+
+# 3-parameter sigmoidal model
+sigmoid_model <- function(x, a, b, x0) {
+  a / (1 + exp(-b * (x - x0)))
+}
+
+sigmoid_mod_URmodel <- nlme(
+  model = use_ratio ~ a / (1 + exp(-b * (WeeksPostStroke - x0))),  # Nonlinear model formula (sigmoid)
+  data = ACUTE,                          # Your dataset
+  fixed = a + b + x0 ~ 1,                    # Fixed effects for the parameters
+  random = a + x0 ~ 1 | SubIDName,         # Random effects (allowing a, b, x0 to vary by subject)
+  start = c(a = 1.2, b = 1, x0 = 5),         # Starting values for a, b, and x0
+  na.action = na.omit,                       # Handling missing values by omitting rows with NAs
+  control = nlmeControl(maxIter = 500, msMaxIter = 500)  # Control iterations for fitting
+)
+
+summary(sigmoid_mod_URmodel)
+-2 * as.numeric(logLik(sigmoid_mod_URmodel))
+3467.8-3263.5
+pchisq(q=3467.8-3263.5, df=3, lower.tail=FALSE)
 
 
 # Extracting coefficients from each person from the best fitting models ---------
@@ -1551,6 +1650,12 @@ ggsave(
 
 # Figure 4A : ARAT Splines ----
 head(COEFS_WIDE)
+head(UNIQUE)
+COEFS_WIDE <- merge(x=COEFS_WIDE, 
+                    y=UNIQUE %>% select(SubIDName, StrokeType),
+                    by.x="subID",
+                    by.y="SubIDName")
+
 ggplot(data=COEFS_WIDE)+
   geom_segment(aes(group=subID,
                    x = 0, 
@@ -1576,7 +1681,7 @@ ggplot(data=COEFS_WIDE)+
   scale_x_continuous(name = "Weeks Post-Stroke", limits=c(0,24)) +
   scale_y_continuous(name = "ARAT (Affected Arm)", limits=c(-30,60),
                      breaks = c(seq(0,60,10))) +
-  #facet_wrap(~enrollTime, scales="free")+
+  #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"),
         legend.text=element_text(size=12, color="black"),
@@ -1624,7 +1729,7 @@ ggplot(data=COEFS_WIDE)+
   scale_x_continuous(name = "Weeks Post-Stroke", limits=c(0,24)) +
   scale_y_continuous(name = "FM UE", limits=c(-5,70),
                      breaks = c(seq(0,70,10))) +
-  #facet_wrap(~enrollTime, scales="free")+
+  #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"),
         legend.text=element_text(size=12, color="black"),
@@ -1674,7 +1779,7 @@ ggplot(data=COEFS_WIDE)+
   scale_x_continuous(name = "Weeks Post-Stroke", limits=c(0,24)) +
   scale_y_continuous(name = "Use Ratio", limits=c(-0.2,1.4),
                      breaks = c(seq(0,1.4,0.2))) +
-  #facet_wrap(~enrollTime, scales="free")+
+  #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"),
         legend.text=element_text(size=12, color="black"),
