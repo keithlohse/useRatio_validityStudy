@@ -42,12 +42,25 @@ write.csv(data.frame(xtabs(~SubIDName+TimePoint, data=STROKE)) %>%
 
 summary(as.factor(STROKE$AffectedSide))
 
+# Note that participants from "PMC8442937" all had first strokes, however,
+# because this was an inclusion criterion, it was not captured in a REDCap field
+# below, we change all of the NAs for these participants to 1's indicating their first stroke
+str_sub(STROKE$SubIDName, 1, 10)
+
+# Note that we filter out anyone who potentially had bilateral deficits below, but 
+# no one actually does! Everyone in the stroke cohort either had a confirmed 
+# dominant or nondominant side deficit.
+STROKE %>% filter(AffectedSide==3) %>% group_by(SubIDName) %>% slice(1)
+STROKE %>% filter(AffectedSide==4) %>% group_by(SubIDName) %>% slice(1)
 
 # recode arms as preferred and non-preferred
 STROKE <- STROKE %>%
   filter(AffectedSide!=3) %>% # exclude both sides affected
   filter(AffectedSide!=4) %>% # exclude neither side affected
-  mutate(non_time = ifelse(AffectedSide == "2", l_time, r_time), #2 = right side affected
+  mutate(
+    NumberofStrokes = ifelse(str_sub(SubIDName, 1, 10)=="PMC8442937", 
+                             1, NumberofStrokes), # set all participants from PMC 8442937 to 1
+    non_time = ifelse(AffectedSide == "2", l_time, r_time), #2 = right side affected
          par_time = ifelse(AffectedSide == "2", r_time,l_time),
          non_only_time = ifelse(AffectedSide == "2", l_only_time, r_only_time),
          par_only_time = ifelse(AffectedSide == "2", r_only_time, l_only_time),
@@ -1693,7 +1706,7 @@ ggplot(data=COEFS_WIDE)+
         legend.position = "none")
 
 ggsave(
-  filename="./outputs/ARAT_splnes.jpeg",
+  filename="./outputs/ARAT_splines.jpeg",
   plot = last_plot(),
   width = 4,
   height = 2.5,
@@ -2193,7 +2206,7 @@ ggsave(
 colnames(COEFS_WIDE)
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("ARAT_atTime0", "ARAT_SlopeAt0",
-                    "ARAT_knot05", "ARAT_knot11"),
+                    "ARAT_SlopeAt05", "ARAT_SlopeAt11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2213,7 +2226,7 @@ ggsave(
 
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("FM_atTime0", "FM_SlopeAt0",
-                    "FM_knot05", "FM_knot11"),
+                    "FM_SlopeAt05", "FM_SlopeAt11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2235,7 +2248,7 @@ ggsave(
 
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("UR_atTime0", "UR_SlopeAt0",
-                    "UR_knot05", "UR_knot11"),
+                    "UR_SlopeAt05", "UR_SlopeAt11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2251,10 +2264,6 @@ ggsave(
   units = "in",
   dpi = 150
 )
-
-
-
-
 
 
 
