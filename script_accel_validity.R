@@ -365,7 +365,7 @@ ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
   stat_poly_line(aes(col=Concordance), se=FALSE) +
   stat_poly_eq(aes(col=Concordance, group=Concordance),
                label.x = "right",
-               label.y = "bottom",) +
+               label.y = "bottom") +
   geom_abline(intercept = 0, slope=1, col="black", lwd=0.5)+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12))+
   scale_y_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12)) +
@@ -373,13 +373,13 @@ ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
   scale_color_manual(values=cbPalette[c(1,2)])+
   scale_shape_manual(values=c(8, 21))+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -416,13 +416,13 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
   scale_color_manual(values=cbPalette[c(1,2)])+
   scale_shape_manual(values=c(8, 21))+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -451,13 +451,13 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -487,18 +487,18 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 
 ggsave(
-  filename="./outputs/nonParetic_ARAT_overTime_WIDE.jpeg",
+  filename="./outputs/nonParetic_ARAT_overTime.jpeg",
   plot = last_plot(),
   width = 4,
   height = 18,
@@ -539,13 +539,13 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -574,13 +574,13 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -610,13 +610,13 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
+  theme(axis.text=element_text(size=14, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+        axis.title=element_text(size=14, face="bold"),
+        plot.title=element_text(size=14, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=14, face="bold"),
         legend.position = "bottom")
 
 ggsave(
