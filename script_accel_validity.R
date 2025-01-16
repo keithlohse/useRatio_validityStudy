@@ -3,7 +3,7 @@ library(car); library(lmerTest); library(GGally); library(viridis); library(patc
 
 
 # Set Colorblind friendly pallette 
-cbPalette <- c("#999999", "#56B4E9","#E69F00", "#009E73", 
+cbPalette <- c("#000000", "#56B4E9","#E69F00", "#009E73", 
                "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
                "#999933", "#882255", "#661100", "#6699CC")
 
@@ -11,7 +11,7 @@ cbPalette <- c("#999999", "#56B4E9","#E69F00", "#009E73",
 cbGradient <- c("#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda","#8c96b9",
                 "#8c96c6", "#8c6bb1", "#88419d", "#810f7c", "#4d004b")
 
-setwd("C:/Users/kelop/Box/LangLab/DataHarmonization/useRatio_validityStudy")
+setwd("C:/Users/lohse/Box/LangLab/DataHarmonization/useRatio_validityStudy")
 list.files()
 
 UE_DATA <- read.csv("./UpperLimbAccelerometry_restricted.csv", header=TRUE, stringsAsFactors = TRUE)
@@ -83,6 +83,33 @@ STROKE <- STROKE %>%
 colnames(STROKE)
 head(STROKE)
 
+# Create Concordance Variables -------------------------------------------------
+# AffectedSide	The participant's affected side
+# AffectedSide	1	Left
+# AffectedSide	2	Right
+# AffectedSide	3	Both
+# AffectedSide	4	Neither/Not applicable
+
+
+# HandPrefType	The participant's preferred/dominant hand
+# HandPrefType	1	Left
+# HandPrefType	2	Right
+# HandPrefType	3	Both
+
+
+STROKE <- STROKE %>%
+  mutate(AffectedSide = factor(ifelse(AffectedSide==1, "Left", 
+                               ifelse(AffectedSide==2, "Right", NA))),
+         HandPrefType = factor(ifelse(HandPrefType==1, "Left", 
+                               ifelse(HandPrefType==2, "Right", "Both"))),
+         Concordance = factor(ifelse(as.character(AffectedSide)==as.character(HandPrefType), 
+                              "domAff", "nonAff")))
+
+table(STROKE$HandPrefType, STROKE$AffectedSide)
+table(STROKE$Concordance, STROKE$AffectedSide)
+summary(STROKE$AffectedSide)
+
+
 
 # Create Chronicity Variables -------------------------------------------------------
 # correlations between variables over time
@@ -91,7 +118,9 @@ summary(STROKE$Chronicity)
 # chronicity is in years, multiply by 52.1 to get approximate weeks
 summary(STROKE$TimePoint)
 
+
 LONG <- STROKE %>% select(SubIDName, Chronicity, TimePoint, StrokeType, 
+                          HandPrefType, AffectedSide, Concordance,
                           AffARATTotal, UEFuglMeyer, 
                         use_ratio, par_time, non_time) %>%
   group_by(SubIDName, TimePoint) %>% # regroup by subject and then sort by ascending times
@@ -329,16 +358,20 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 
-
+colnames(FIRST_DATA)
 ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
-  geom_point(col="black", shape=21)+
+  geom_point(aes(shape=Concordance), col="black")+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
   geom_abline(intercept = 0, slope=1, col="black", lwd=0.5)+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12))+
   scale_y_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12)) +
   facet_wrap(~weeksCat, ncol=1)+
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -370,15 +403,18 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
-  geom_point(shape=21)+
-  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
-  scale_color_manual(values=cbPalette)+
+  geom_point(aes(shape=Concordance), col="black")+
+  #stat_smooth(method="lm", se=TRUE)+
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   theme_bw()+
   theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
@@ -402,10 +438,14 @@ ggsave(
 
 # ARAT by Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
-  geom_point(col="black", shape=21)+
+  geom_point(aes(shape=Concordance), col="black")+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
@@ -431,15 +471,17 @@ ggsave(
 
 
 
-summary(FIRST_DATA$par_time)
-summary(FIRST_DATA$non_time)
 
 # ARAT by Non-Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
-  geom_point(col="black", shape=21)+
+  geom_point(aes(shape=Concordance), col="black")+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
@@ -484,11 +526,14 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 
 summary(FIRST_DATA$use_ratio)
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
-  geom_point(shape=21)+
-  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
-  scale_color_manual(values=cbPalette)+
+  geom_point(aes(shape=Concordance), col="black")+
+  #stat_smooth(method="lm", se=TRUE)+
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
@@ -516,10 +561,14 @@ ggsave(
 
 # FM UE by Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
-  geom_point(col="black", shape=21)+
+  geom_point(aes(shape=Concordance), col="black")+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
@@ -548,10 +597,14 @@ ggsave(
 
 # FM UE by Non-Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
-  geom_point(col="black", shape=21)+
+  geom_point(aes(shape=Concordance), col="black")+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_line(aes(col=Concordance), se=FALSE) +
+  stat_poly_eq(aes(col=Concordance, group=Concordance),
+               label.x = "right",
+               label.y = "bottom",) +
+  scale_color_manual(values=cbPalette[c(1,2)])+
+  scale_shape_manual(values=c(8, 21))+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
