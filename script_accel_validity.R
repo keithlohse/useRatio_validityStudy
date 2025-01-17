@@ -11,7 +11,7 @@ cbPalette <- c("#000000", "#56B4E9","#E69F00", "#009E73",
 cbGradient <- c("#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda","#8c96b9",
                 "#8c96c6", "#8c6bb1", "#88419d", "#810f7c", "#4d004b")
 
-setwd("C:/Users/lohse/Box/LangLab/DataHarmonization/useRatio_validityStudy")
+setwd("C:/Users/kelop/Box/LangLab/DataHarmonization/useRatio_validityStudy")
 list.files()
 
 UE_DATA <- read.csv("./UpperLimbAccelerometry_restricted.csv", header=TRUE, stringsAsFactors = TRUE)
@@ -641,6 +641,7 @@ UNIQUE<-STROKE %>% group_by(SubIDName) %>% arrange(TimePoint) %>%
   mutate(Observations=n()) %>% ungroup() %>% arrange(SubIDName, TimePoint) %>%
   group_by(SubIDName) %>% slice(1) %>%
   mutate(AffectedSide=factor(AffectedSide),
+         Concordance = factor(Concordance),
          TherpyRehabLocTyp = factor(TherpyRehabLocTyp),
          HandPrefType=factor(HandPrefType),
          BirthSexAssignTyp=factor(BirthSexAssignTyp),
@@ -652,7 +653,7 @@ UNIQUE<-STROKE %>% group_by(SubIDName) %>% arrange(TimePoint) %>%
          LivingStatus=factor(LivingStatus),
          Chronicity=Chronicity*52.1) %>%
   select(SubIDName, AgeVal, BirthSexAssignTyp, RaceUSACat, EthnUSACat, EduYrCt,       
-         StrokeType, StrokeLocation, AffectedSide, TherpyRehabLocTyp,
+         StrokeType, StrokeLocation, AffectedSide, Concordance, TherpyRehabLocTyp,
          Chronicity, NumberofStrokes, LivingStatus, 
          # Enroll Variables
          CESDTotalScore, MesulamTotalErrors, MesulamDifference, MoCATotal,
@@ -679,12 +680,13 @@ head(LONG)
 # Change in ARAT
 ggplot(data=ACUTE, 
        aes(x=WeeksPostStroke, y=AffARATTotal))+
-  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3,
+  geom_line(aes(group=SubIDName, col=Concordance), lty=1, alpha=0.5,
             position = position_dodge(width=0.4))+
-  geom_point(aes(group=SubIDName), col="black", shape=21, alpha=0.3,
+  geom_point(aes(group=SubIDName, col=Concordance), shape=21, alpha=0.5,
              position = position_dodge(width=0.4))+
-  #stat_smooth(method = "loess", col="blue", alpha=0.5, se=TRUE, lwd=1,
-  #            xseq = seq(0,26, length=80))+
+  stat_smooth(aes(col=Concordance), method = "lm", 
+              formula=y~x+I(x^2)+I(x^3), 
+              alpha=0.5, se=TRUE, lwd=1, xseq = seq(3,26, length=80))+
   scale_x_continuous(name = "Weeks Post-Stroke") +
   scale_y_continuous(name = "ARAT (Affected Arm)") +
   #facet_wrap(~enrollTime, scales="free")+
@@ -696,7 +698,7 @@ ggplot(data=ACUTE,
         plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
         strip.text = element_text(size=12, face="bold"),
-        legend.position = "none")
+        legend.position = "bottom")
 
 ggsave(
   filename="./outputs/acute_ARAT_detailed.jpeg",
@@ -712,12 +714,13 @@ ggsave(
 # Change in Use Ratio ----------------------------------------------------------
 ggplot(data=ACUTE, 
        aes(x=WeeksPostStroke, y=use_ratio))+
-  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3,
+  geom_line(aes(group=SubIDName, col=Concordance), lty=1, alpha=0.5,
             position = position_dodge(width=0.4))+
-  geom_point(aes(group=SubIDName), col="black", shape=21, alpha=0.3,
+  geom_point(aes(group=SubIDName, col=Concordance), shape=21, alpha=0.5,
              position = position_dodge(width=0.4))+
-  # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
-  #              alpha=0.5, se=FALSE, lwd=0.5)+
+  stat_smooth(aes(col=Concordance), method = "lm", 
+              formula=y~x+I(x^2)+I(x^3), 
+              alpha=0.5, se=TRUE, lwd=1, xseq = seq(3,26, length=80))+
   scale_x_continuous(name = "Weeks Post-Stroke") +
   scale_y_continuous(name = "Use Ratio") +
   #facet_wrap(~enrollTime, scales="free")+
@@ -729,7 +732,7 @@ ggplot(data=ACUTE,
         plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
         strip.text = element_text(size=12, face="bold"),
-        legend.position = "none")
+        legend.position = "bottom")
 
 ggsave(
   filename="./outputs/acute_useRatio_detailed.jpeg",
