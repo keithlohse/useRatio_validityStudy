@@ -42,16 +42,17 @@ write.csv(data.frame(xtabs(~SubIDName+TimePoint, data=STROKE)) %>%
 
 summary(as.factor(STROKE$AffectedSide))
 
-# Note that participants from "PMC8442937" all had first strokes, however,
-# because this was an inclusion criterion, it was not captured in a REDCap field
-# below, we change all of the NAs for these participants to 1's indicating their first stroke
-str_sub(STROKE$SubIDName, 1, 10)
 
 # Note that we filter out anyone who potentially had bilateral deficits below, but 
 # no one actually does! Everyone in the stroke cohort either had a confirmed 
 # dominant or nondominant side deficit.
 STROKE %>% filter(AffectedSide==3) %>% group_by(SubIDName) %>% slice(1)
 STROKE %>% filter(AffectedSide==4) %>% group_by(SubIDName) %>% slice(1)
+
+# Note that participants from "PMC8442937" all had first strokes, however,
+# because this was an inclusion criterion, it was not captured in a REDCap field
+# below, we change all of the NAs for these participants to 1's indicating their first stroke
+str_sub(STROKE$SubIDName, 1, 10)
 
 # recode arms as preferred and non-preferred
 STROKE <- STROKE %>%
@@ -629,6 +630,14 @@ ggsave(
 )
 
 
+
+
+# Use Ratio by Concordance ----
+for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
+  print(t)
+  print(t.test(use_ratio~Concordance,
+               data=FIRST_DATA[FIRST_DATA$weeksCat==eval(t),]))
+}
 
 
 
