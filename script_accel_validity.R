@@ -3,7 +3,7 @@ library(car); library(lmerTest); library(GGally); library(viridis); library(patc
 
 
 # Set Colorblind friendly pallette 
-cbPalette <- c("#000000", "#56B4E9","#E69F00", "#009E73", 
+cbPalette <- c("#999999", "#56B4E9","#E69F00", "#009E73", 
                "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
                "#999933", "#882255", "#661100", "#6699CC")
 
@@ -14,17 +14,36 @@ cbGradient <- c("#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda","#8c96b9",
 setwd("C:/Users/kelop/Box/LangLab/DataHarmonization/useRatio_validityStudy")
 list.files()
 
+# Make sure these files from NICHD DASH are saved in your working directory:
 UE_DATA <- read.csv("./UpperLimbAccelerometry_restricted.csv", header=TRUE, stringsAsFactors = TRUE)
 LE_DATA <- read.csv("./LowerLimbAccelerometry_restricted.csv", header=TRUE, stringsAsFactors = TRUE)
 CLINICAL <- read.csv("./DemographicClinicalData_restricted.csv", header=TRUE, stringsAsFactors = TRUE)
+
+# Note that in the full dataset we have 790 people with 2885 time points
+# There are 230 non-clinical pediatric/adult participants in the unrestricted data (not imported)
+# and 155 non-clinical adult participants in the restricted data
 
 colnames(CLINICAL)
 colnames(UE_DATA)
 colnames(LE_DATA)
 
+unique(CLINICAL$SubIDName)
+summary(factor(CLINICAL %>% 
+                 group_by(SubIDName) %>%
+                 slice(1) %>%
+                 pull(Condition)))
+
 STROKE <- CLINICAL %>%
-  filter(Condition==1) %>%
+  filter(Condition==1) %>% # include only individuals with diagnosis of stroke
   mutate(SubIDName=factor(SubIDName))
+
+summary(factor(STROKE %>% 
+                 group_by(SubIDName) %>%
+                 slice(1) %>%
+                 pull(Condition)))
+
+length(factor(unique(STROKE$SubIDName)))
+
 
 LE_DATA <- LE_DATA %>% 
   pivot_wider(values_from = AverageStepsPerDay, 
@@ -32,7 +51,8 @@ LE_DATA <- LE_DATA %>%
 
 STROKE <- merge(x=STROKE, y=UE_DATA, by=c("SubIDName", "TimePoint"))
 STROKE <- merge(x=STROKE, y=LE_DATA, by=c("SubIDName", "TimePoint"),
-                all = TRUE)
+                all.x = TRUE)
+unique(STROKE$SubIDName)
 
 
 colnames(STROKE)
@@ -43,25 +63,11 @@ write.csv(data.frame(xtabs(~SubIDName+TimePoint, data=STROKE)) %>%
 summary(as.factor(STROKE$AffectedSide))
 
 
-# Note that we filter out anyone who potentially had bilateral deficits below, but 
-# no one actually does! Everyone in the stroke cohort either had a confirmed 
-# dominant or nondominant side deficit.
-STROKE %>% filter(AffectedSide==3) %>% group_by(SubIDName) %>% slice(1)
-STROKE %>% filter(AffectedSide==4) %>% group_by(SubIDName) %>% slice(1)
-
-# Note that participants from "PMC8442937" all had first strokes, however,
-# because this was an inclusion criterion, it was not captured in a REDCap field
-# below, we change all of the NAs for these participants to 1's indicating their first stroke
-str_sub(STROKE$SubIDName, 1, 10)
-
 # recode arms as preferred and non-preferred
 STROKE <- STROKE %>%
   filter(AffectedSide!=3) %>% # exclude both sides affected
   filter(AffectedSide!=4) %>% # exclude neither side affected
-  mutate(
-    NumberofStrokes = ifelse(str_sub(SubIDName, 1, 10)=="PMC8442937", 
-                             1, NumberofStrokes), # set all participants from PMC 8442937 to 1
-    non_time = ifelse(AffectedSide == "2", l_time, r_time), #2 = right side affected
+  mutate(non_time = ifelse(AffectedSide == "2", l_time, r_time), #2 = right side affected
          par_time = ifelse(AffectedSide == "2", r_time,l_time),
          non_only_time = ifelse(AffectedSide == "2", l_only_time, r_only_time),
          par_only_time = ifelse(AffectedSide == "2", r_only_time, l_only_time),
@@ -84,33 +90,6 @@ STROKE <- STROKE %>%
 colnames(STROKE)
 head(STROKE)
 
-# Create Concordance Variables -------------------------------------------------
-# AffectedSide	The participant's affected side
-# AffectedSide	1	Left
-# AffectedSide	2	Right
-# AffectedSide	3	Both
-# AffectedSide	4	Neither/Not applicable
-
-
-# HandPrefType	The participant's preferred/dominant hand
-# HandPrefType	1	Left
-# HandPrefType	2	Right
-# HandPrefType	3	Both
-
-
-STROKE <- STROKE %>%
-  mutate(AffectedSide = factor(ifelse(AffectedSide==1, "Left", 
-                               ifelse(AffectedSide==2, "Right", NA))),
-         HandPrefType = factor(ifelse(HandPrefType==1, "Left", 
-                               ifelse(HandPrefType==2, "Right", "Both"))),
-         Concordance = factor(ifelse(as.character(AffectedSide)==as.character(HandPrefType), 
-                              "domAff", "nonAff")))
-
-table(STROKE$HandPrefType, STROKE$AffectedSide)
-table(STROKE$Concordance, STROKE$AffectedSide)
-summary(STROKE$AffectedSide)
-
-
 
 # Create Chronicity Variables -------------------------------------------------------
 # correlations between variables over time
@@ -119,9 +98,7 @@ summary(STROKE$Chronicity)
 # chronicity is in years, multiply by 52.1 to get approximate weeks
 summary(STROKE$TimePoint)
 
-
 LONG <- STROKE %>% select(SubIDName, Chronicity, TimePoint, StrokeType, 
-                          HandPrefType, AffectedSide, Concordance,
                           AffARATTotal, UEFuglMeyer, 
                         use_ratio, par_time, non_time) %>%
   group_by(SubIDName, TimePoint) %>% # regroup by subject and then sort by ascending times
@@ -138,9 +115,12 @@ LONG <- STROKE %>% select(SubIDName, Chronicity, TimePoint, StrokeType,
                       labels = c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52"))),
     weeksCat = fct_relevel(weeksCat, "Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")
     ) %>%
-  group_by(SubIDName, weeksCat) %>% arrange(TimePoint) %>% 
+  group_by(SubIDName, weeksCat) %>% arrange(SubIDName, TimePoint) %>% 
   relocate(SubIDName, enrollChronicity, TimePoint, WeeksPostStroke, enrollCat, weeksCat) %>%
   ungroup()
+
+
+
 
 # Availability of Data at Different Time Points ---------------------------------
 library(ggridges)
@@ -205,10 +185,14 @@ FIRST_DATA <- LONG %>% group_by(SubIDName, weeksCat) %>% arrange(TimePoint) %>%
   filter(is.na(weeksCat)==FALSE) %>%
   ungroup()
 
+length(unique(STROKE$SubIDName))
+length(unique(LONG$SubIDName))
+
 xtabs(~SubIDName, data=FIRST_DATA) 
 xtabs(~SubIDName+enrollCat, data=FIRST_DATA) # number of observations by when enrolled
 xtabs(~SubIDName+weeksCat, data=FIRST_DATA) # there should only be one observations by weekCat
 
+# observations per time window ----
 FIRST_DATA %>% group_by(weeksCat) %>%
   summarise(complete_UR = sum(is.na(use_ratio)==FALSE),
             complete_ARAT = sum(is.na(AffARATTotal)==FALSE),
@@ -339,7 +323,7 @@ ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE),
         legend.position = "none")
 
 ggsave(
-  filename="./outputs/fuglyMeyer_overTime_allSubjects.jpeg",
+  filename="./outputs/fuglMeyer_overTime_allSubjects.jpeg",
   plot = last_plot(),
   width = 5,
   height = 3,
@@ -359,28 +343,24 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 
-colnames(FIRST_DATA)
+
 ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
-  geom_point(aes(shape=Concordance), col="black")+
+  geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom") +
+  stat_poly_line() +
+  stat_poly_eq() +
   geom_abline(intercept = 0, slope=1, col="black", lwd=0.5)+
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12))+
   scale_y_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12)) +
   facet_wrap(~weeksCat, ncol=1)+
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -404,26 +384,23 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 }
 
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
-  geom_point(aes(shape=Concordance), col="black")+
-  #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
+  geom_point(shape=21)+
+  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
+  stat_poly_line() +
+  stat_poly_eq() +
+  scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -439,26 +416,22 @@ ggsave(
 
 # ARAT by Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
-  geom_point(aes(shape=Concordance), col="black")+
+  geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
+  stat_poly_line() +
+  stat_poly_eq() +
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -472,29 +445,29 @@ ggsave(
 
 
 
+summary(FIRST_DATA$par_time)
+summary(FIRST_DATA$non_time)
+
+
 
 # ARAT by Non-Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
-  geom_point(aes(shape=Concordance), col="black")+
+  geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
+  stat_poly_line() +
+  stat_poly_eq() +
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 
@@ -527,26 +500,23 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 
 summary(FIRST_DATA$use_ratio)
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
-  geom_point(aes(shape=Concordance), col="black")+
-  #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
+  geom_point(shape=21)+
+  #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
+  stat_poly_line() +
+  stat_poly_eq() +
+  scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -562,26 +532,22 @@ ggsave(
 
 # FM UE by Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
-  geom_point(aes(shape=Concordance), col="black")+
+  geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
+  stat_poly_line() +
+  stat_poly_eq() +
   scale_x_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -598,26 +564,22 @@ ggsave(
 
 # FM UE by Non-Paretic Time ----
 ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
-  geom_point(aes(shape=Concordance), col="black")+
+  geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
-  stat_poly_line(aes(col=Concordance), se=FALSE) +
-  stat_poly_eq(aes(col=Concordance, group=Concordance),
-               label.x = "right",
-               label.y = "bottom",) +
-  scale_color_manual(values=cbPalette[c(1,2)])+
-  scale_shape_manual(values=c(8, 21))+
+  stat_poly_line() +
+  stat_poly_eq() +
   scale_x_continuous(name="Non-Paretic Time (h)", breaks=c(seq(0,12,2)))+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=14, color="black"), 
+  theme(axis.text=element_text(size=12, color="black"), 
         legend.text=element_text(size=12, color="black"),
         legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=14, face="bold"),
-        plot.title=element_text(size=14, face="bold", hjust=0.5),
+        axis.title=element_text(size=12, face="bold"),
+        plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=14, face="bold"),
+        strip.text = element_text(size=12, face="bold"),
         legend.position = "bottom")
 
 ggsave(
@@ -632,14 +594,6 @@ ggsave(
 
 
 
-# Use Ratio by Concordance ----
-for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
-  print(t)
-  print(t.test(use_ratio~Concordance,
-               data=FIRST_DATA[FIRST_DATA$weeksCat==eval(t),]))
-}
-
-
 
 
 # Part 1: Demographic statistics for the overall cohort --------------------------------
@@ -650,7 +604,6 @@ UNIQUE<-STROKE %>% group_by(SubIDName) %>% arrange(TimePoint) %>%
   mutate(Observations=n()) %>% ungroup() %>% arrange(SubIDName, TimePoint) %>%
   group_by(SubIDName) %>% slice(1) %>%
   mutate(AffectedSide=factor(AffectedSide),
-         Concordance = factor(Concordance),
          TherpyRehabLocTyp = factor(TherpyRehabLocTyp),
          HandPrefType=factor(HandPrefType),
          BirthSexAssignTyp=factor(BirthSexAssignTyp),
@@ -662,7 +615,7 @@ UNIQUE<-STROKE %>% group_by(SubIDName) %>% arrange(TimePoint) %>%
          LivingStatus=factor(LivingStatus),
          Chronicity=Chronicity*52.1) %>%
   select(SubIDName, AgeVal, BirthSexAssignTyp, RaceUSACat, EthnUSACat, EduYrCt,       
-         StrokeType, StrokeLocation, AffectedSide, Concordance, TherpyRehabLocTyp,
+         StrokeType, StrokeLocation, AffectedSide, TherpyRehabLocTyp,
          Chronicity, NumberofStrokes, LivingStatus, 
          # Enroll Variables
          CESDTotalScore, MesulamTotalErrors, MesulamDifference, MoCATotal,
@@ -683,19 +636,23 @@ summary(as.factor(UNIQUE$NumberofStrokes))
 ACUTE <- LONG %>% filter(enrollCat=="Week0" | enrollCat=="Week6") %>%
   mutate(SubIDName = factor(SubIDName))
 
+# median and IQR for duration of observation ---
+ACUTE %>% group_by(SubIDName) %>%
+  slice(n()) %>% pull(WeeksPostStroke) %>% 
+  summary()
+
 # Spaghetti Plots showing change in variables over time ------------------------
 head(LONG)
 
 # Change in ARAT
 ggplot(data=ACUTE, 
        aes(x=WeeksPostStroke, y=AffARATTotal))+
-  geom_line(aes(group=SubIDName, col=Concordance), lty=1, alpha=0.5,
+  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3,
             position = position_dodge(width=0.4))+
-  geom_point(aes(group=SubIDName, col=Concordance), shape=21, alpha=0.5,
+  geom_point(aes(group=SubIDName), col="black", shape=21, alpha=0.3,
              position = position_dodge(width=0.4))+
-  stat_smooth(aes(col=Concordance), method = "lm", 
-              formula=y~x+I(x^2)+I(x^3), 
-              alpha=0.5, se=TRUE, lwd=1, xseq = seq(3,26, length=80))+
+  #stat_smooth(method = "loess", col="blue", alpha=0.5, se=TRUE, lwd=1,
+  #            xseq = seq(0,26, length=80))+
   scale_x_continuous(name = "Weeks Post-Stroke") +
   scale_y_continuous(name = "ARAT (Affected Arm)") +
   #facet_wrap(~enrollTime, scales="free")+
@@ -707,7 +664,7 @@ ggplot(data=ACUTE,
         plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
         strip.text = element_text(size=12, face="bold"),
-        legend.position = "bottom")
+        legend.position = "none")
 
 ggsave(
   filename="./outputs/acute_ARAT_detailed.jpeg",
@@ -723,13 +680,12 @@ ggsave(
 # Change in Use Ratio ----------------------------------------------------------
 ggplot(data=ACUTE, 
        aes(x=WeeksPostStroke, y=use_ratio))+
-  geom_line(aes(group=SubIDName, col=Concordance), lty=1, alpha=0.5,
+  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3,
             position = position_dodge(width=0.4))+
-  geom_point(aes(group=SubIDName, col=Concordance), shape=21, alpha=0.5,
+  geom_point(aes(group=SubIDName), col="black", shape=21, alpha=0.3,
              position = position_dodge(width=0.4))+
-  stat_smooth(aes(col=Concordance), method = "lm", 
-              formula=y~x+I(x^2)+I(x^3), 
-              alpha=0.5, se=TRUE, lwd=1, xseq = seq(3,26, length=80))+
+  # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
+  #              alpha=0.5, se=FALSE, lwd=0.5)+
   scale_x_continuous(name = "Weeks Post-Stroke") +
   scale_y_continuous(name = "Use Ratio") +
   #facet_wrap(~enrollTime, scales="free")+
@@ -741,7 +697,7 @@ ggplot(data=ACUTE,
         plot.title=element_text(size=12, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
         strip.text = element_text(size=12, face="bold"),
-        legend.position = "bottom")
+        legend.position = "none")
 
 ggsave(
   filename="./outputs/acute_useRatio_detailed.jpeg",
@@ -1771,7 +1727,7 @@ ggplot(data=COEFS_WIDE)+
         legend.position = "none")
 
 ggsave(
-  filename="./outputs/ARAT_splines.jpeg",
+  filename="./outputs/ARAT_splnes.jpeg",
   plot = last_plot(),
   width = 4,
   height = 2.5,
@@ -2271,7 +2227,7 @@ ggsave(
 colnames(COEFS_WIDE)
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("ARAT_atTime0", "ARAT_SlopeAt0",
-                    "ARAT_SlopeAt05", "ARAT_SlopeAt11"),
+                    "ARAT_knot05", "ARAT_knot11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2291,7 +2247,7 @@ ggsave(
 
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("FM_atTime0", "FM_SlopeAt0",
-                    "FM_SlopeAt05", "FM_SlopeAt11"),
+                    "FM_knot05", "FM_knot11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2313,7 +2269,7 @@ ggsave(
 
 ggpairs(COEFS_WIDE %>% select(-subID),
         columns = c("UR_atTime0", "UR_SlopeAt0",
-                    "UR_SlopeAt05", "UR_SlopeAt11"),
+                    "UR_knot05", "UR_knot11"),
         mapping = ggplot2::aes(alpha=0.5),
         lower = list(continuous = wrap("points", shape=21)),
         upper = list(continuous = wrap("cor", size = 5)),
@@ -2329,6 +2285,10 @@ ggsave(
   units = "in",
   dpi = 150
 )
+
+
+
+
 
 
 
