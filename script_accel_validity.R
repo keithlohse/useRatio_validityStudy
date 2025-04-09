@@ -11,7 +11,7 @@ cbPalette <- c("#999999", "#56B4E9","#E69F00", "#009E73",
 cbGradient <- c("#f7fcfd", "#e0ecf4", "#bfd3e6", "#9ebcda","#8c96b9",
                 "#8c96c6", "#8c6bb1", "#88419d", "#810f7c", "#4d004b")
 
-setwd("C:/Users/kelop/Box/LangLab/DataHarmonization/useRatio_validityStudy")
+setwd("C:/Users/lohse/Box/LangLab/DataHarmonization/useRatio_validityStudy")
 list.files()
 
 # Make sure these files from NICHD DASH are saved in your working directory:
@@ -202,134 +202,145 @@ FIRST_DATA %>% group_by(weeksCat) %>%
 
 # ARAT -------------------------------------------------------------------------
 # Spaghetti plot showing data for all participants ---
-ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
+Figure1A <- ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
        aes(x=WeeksPostStroke, y=AffARATTotal))+
   geom_rect(xmin=log(1.4, 10), xmax=log(4, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(6, 10), xmax=log(7, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(12, 10), xmax=log(14, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(24, 10), xmax=log(27, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(36, 10), xmax=log(40, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(52, 10), xmax=log(58, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3)+
-  geom_point(aes(group=SubIDName, fill=weeksCat), col="black", shape=21, alpha=0.3)+
+            col="grey70", fill="grey90")+
+  geom_line(aes(group=SubIDName), col="black", lwd=0.5, alpha=0.5)+
+  geom_point(aes(group=SubIDName, col=weeksCat), 
+             shape=16, alpha=0.5, size=1)+
   # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
   #             alpha=0.5, se=FALSE, lwd=0.5)+
   scale_x_log10(name = "Weeks Post-Stroke (log[10] scale)") +
-  scale_y_continuous(name = "ARAT (Affected Arm)") +
+  scale_y_continuous(name = "ARAT (Affected Arm)", limits=c(0,60)) +
   scale_fill_manual(values=cbPalette)+
+  scale_color_manual(values=cbPalette)+
   #facet_wrap(~enrollTime, scales="free")+
   theme_bw()+labs(fill="Time Window")+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=10, color="black"),
-        legend.title=element_text(size=10, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=8, face="bold"),
         legend.position = "none")
 
 ggsave(
   filename="./outputs/ARAT_overTime_allSubjects.jpeg",
-  plot = last_plot(),
+  plot = Figure1A,
   width = 5,
   height = 3,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
-
-# Spaghetti plot of Use Ratio for all subjects --------------------
-ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
-       aes(x=WeeksPostStroke, y=use_ratio))+
-  geom_rect(xmin=log(1.4, 10), xmax=log(4, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_rect(xmin=log(6, 10), xmax=log(7, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_rect(xmin=log(12, 10), xmax=log(14, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_rect(xmin=log(24, 10), xmax=log(27, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_rect(xmin=log(36, 10), xmax=log(40, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_rect(xmin=log(52, 10), xmax=log(58, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3)+
-  geom_point(aes(group=SubIDName, fill=weeksCat), col="black", shape=21, alpha=0.3)+
-  # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
-  #             alpha=0.5, se=FALSE, lwd=0.5)+
-  scale_x_log10(name = "Weeks Post-Stroke (log[10] scale)") +
-  scale_y_continuous(name = "Use Ratio") +
-  scale_fill_manual(values=cbPalette)+
-  #facet_wrap(~enrollTime, scales="free")+
-  theme_bw()+labs(fill="Time Window")+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=10, color="black"),
-        legend.title=element_text(size=10, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
-        panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
-        legend.position = "none")
-
-ggsave(
-  filename="./outputs/useRatio_overTime_allSubjects.jpeg",
-  plot = last_plot(),
-  width = 5,
-  height = 3,
-  units = "in",
-  dpi = 300
-)
-
 
 
 
 # Spaghetti Plot of FM UE for all subjects ---------------------
 colnames(LONG)
-ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
+Figure1B<-ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
        aes(x=WeeksPostStroke, y=UEFuglMeyer))+
   geom_rect(xmin=log(1.4, 10), xmax=log(4, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(6, 10), xmax=log(7, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(12, 10), xmax=log(14, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(24, 10), xmax=log(27, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(36, 10), xmax=log(40, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
+            col="grey70", fill="grey90")+
   geom_rect(xmin=log(52, 10), xmax=log(58, 10), ymin=-Inf, ymax=Inf, 
-            col="grey60", fill="grey90")+
-  geom_line(aes(group=SubIDName), col="black", lty=1, alpha=0.3)+
-  geom_point(aes(group=SubIDName, fill=weeksCat), col="black", shape=21, alpha=0.3)+
+            col="grey70", fill="grey90")+
+  geom_line(aes(group=SubIDName), col="black", lwd=0.5, alpha=0.5)+
+  geom_point(aes(group=SubIDName, col=weeksCat), 
+             shape=16, alpha=0.5, size=1)+
   # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
   #             alpha=0.5, se=FALSE, lwd=0.5)+
   scale_x_log10(name = "Weeks Post-Stroke (log[10] scale)") +
   scale_y_continuous(name = "Fugl-Meyer UE") +
   scale_fill_manual(values=cbPalette)+
+  scale_color_manual(values=cbPalette)+
   #facet_wrap(~enrollTime, scales="free")+
   theme_bw()+labs(fill="Time Window")+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=10, color="black"),
-        legend.title=element_text(size=10, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=8, face="bold"),
         legend.position = "none")
 
 ggsave(
   filename="./outputs/fuglMeyer_overTime_allSubjects.jpeg",
-  plot = last_plot(),
+  plot = Figure1B,
   width = 5,
   height = 3,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
+
+# Spaghetti plot of Use Ratio for all subjects --------------------
+Figure1C<-ggplot(data=LONG %>% filter(is.na(weeksCat)==FALSE), 
+                 aes(x=WeeksPostStroke, y=use_ratio))+
+  geom_rect(xmin=log(1.4, 10), xmax=log(4, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_rect(xmin=log(6, 10), xmax=log(7, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_rect(xmin=log(12, 10), xmax=log(14, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_rect(xmin=log(24, 10), xmax=log(27, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_rect(xmin=log(36, 10), xmax=log(40, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_rect(xmin=log(52, 10), xmax=log(58, 10), ymin=-Inf, ymax=Inf, 
+            col="grey70", fill="grey90")+
+  geom_line(aes(group=SubIDName), col="black", lwd=0.5, alpha=0.5)+
+  geom_point(aes(group=SubIDName, col=weeksCat), 
+             shape=16, alpha=0.5, size=1)+
+  # stat_smooth(aes(group=SubIDName, col=SubIDName), method = "lm", formula=y~x,
+  #             alpha=0.5, se=FALSE, lwd=0.5)+
+  scale_x_log10(name = "Weeks Post-Stroke (log[10] scale)") +
+  scale_y_continuous(name = "Use Ratio") +
+  scale_fill_manual(values=cbPalette)+
+  scale_color_manual(values=cbPalette)+
+  #facet_wrap(~enrollTime, scales="free")+
+  theme_bw()+labs(fill="Time Window")+
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(size=8, face="bold"),
+        legend.position = "none")
+
+ggsave(
+  filename="./outputs/useRatio_overTime_allSubjects.jpeg",
+  plot = Figure1B,
+  width = 5,
+  height = 3,
+  units = "in",
+  dpi = 150
+)
+
+# Figure 1A --------------------------------------------------------------------
+Fig1A <- Figure1A/Figure1B/Figure1C
 
 
 # Paretic to Non-Paretic Time ----
@@ -344,7 +355,7 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 
 
 
-ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
+useRatio<-ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
   geom_point(col="black", shape=21)+
   #stat_smooth(method="lm", se=TRUE)+
   stat_poly_line() +
@@ -354,22 +365,22 @@ ggplot(data=FIRST_DATA, aes(y=par_time, x=non_time))+
   scale_y_continuous(name="Paretic Time (h)", breaks=c(seq(0,12,2)), limits=c(0,12)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/Paretic_to_nonParetic_overTime.jpeg",
-  plot = last_plot(),
-  width = 4,
-  height = 18,
+  plot = useRatio,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -383,33 +394,35 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
                  use="complete"))
 }
 
-ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
+ARAT_useRatio<-ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=use_ratio))+
   geom_point(shape=21)+
   #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
   stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_eq(label.x = "right",   # x position: "left", "right", "center", or numeric
+               label.y = "bottom"   # y position: "top", "bottom", "center", or numeric
+               ) +
   scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Affected Side ARAT", breaks=c(seq(0,60,10)),
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/useRatio_ARAT_overTime.jpeg",
-  plot = last_plot(),
-  width = 4,
-  height = 18,
+  plot = ARAT_useRatio,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -425,22 +438,22 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=par_time))+
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/paretic_ARAT_overTime.jpeg",
   plot = last_plot(),
-  width = 4,
-  height = 18,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -461,23 +474,23 @@ ggplot(data=FIRST_DATA, aes(y=AffARATTotal, x=non_time))+
                      limits=c(0,60)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 
 ggsave(
   filename="./outputs/nonParetic_ARAT_overTime.jpeg",
   plot = last_plot(),
-  width = 4,
-  height = 18,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -499,33 +512,35 @@ for (t in c("Week0", "Week6", "Week12", "Week24", "Week36", "MoreThan52")) {
 
 
 summary(FIRST_DATA$use_ratio)
-ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
+FM_useRatio<-ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=use_ratio))+
   geom_point(shape=21)+
   #stat_smooth(aes(col=as.factor(StrokeType)), method="lm", se=TRUE)+
   stat_poly_line() +
-  stat_poly_eq() +
+  stat_poly_eq(label.x = "right",   # x position: "left", "right", "center", or numeric
+               label.y = "bottom"   # y position: "top", "bottom", "center", or numeric
+               ) +
   scale_color_manual(values=cbPalette)+
   scale_x_continuous(name="Use Ratio (paretic/non-paretic)")+
   scale_y_continuous(name = "Fugl-Meyer UE", breaks=c(seq(0,70,10)),
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/useRatio_fuglMeyer_overTime.jpeg",
-  plot = last_plot(),
-  width = 4,
-  height = 18,
+  plot = FM_useRatio,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -541,22 +556,22 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=par_time))+
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/paretic_fulgMeyer_overTime.jpeg",
   plot = last_plot(),
-  width = 4,
-  height = 18,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -573,27 +588,36 @@ ggplot(data=FIRST_DATA, aes(y=UEFuglMeyer, x=non_time))+
                      limits=c(0,70)) +
   facet_wrap(~weeksCat, ncol=1)+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"), 
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "bottom")
 
 ggsave(
   filename="./outputs/nonParetic_fuglMeyer_overTime.jpeg",
   plot = last_plot(),
-  width = 4,
-  height = 18,
+  width = 3,
+  height = 12,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
+# Figure 3 ---------------------------------------------------------------------
+(useRatio|ARAT_useRatio|FM_useRatio) & plot_annotation(tag_levels = 'A')
 
-
+ggsave(
+  filename="./paper/Figure3.pdf",
+  plot = last_plot(),
+  width = 8,
+  height = 10,
+  units = "in",
+  dpi = 600
+)
 
 
 # Part 1: Demographic statistics for the overall cohort --------------------------------
@@ -672,7 +696,7 @@ ggsave(
   width = 5,
   height = 3,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -705,7 +729,7 @@ ggsave(
   width = 4,
   height = 3,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -719,7 +743,7 @@ unique(ACUTE$SubIDName)
 # PMC8442937_017
 colnames(ACUTE)
 
-ggplot(data=ACUTE %>% 
+S1_ARAT<-ggplot(data=ACUTE %>% 
          filter(SubIDName=="PMC8442937_049"), 
        aes(x=WeeksPostStroke, y=AffARATTotal))+
   geom_line(aes(group=SubIDName), col="black", lty=1, 
@@ -733,27 +757,43 @@ ggplot(data=ACUTE %>%
                      breaks = c(seq(0,60,10))) +
   #facet_wrap(~enrollTime, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=8, face="bold"),
         legend.position = "none")
 
-ggsave(
-  filename="./outputs/change_in_ARAT_singleSubject_B.jpeg",
-  plot = last_plot(),
-  width = 3,
-  height = 2.5,
-  units = "in",
-  dpi = 300
-)
+S2_ARAT<-ggplot(data=ACUTE %>% 
+                  filter(SubIDName=="PMC8442937_017"), 
+                aes(x=WeeksPostStroke, y=AffARATTotal))+
+  geom_line(aes(group=SubIDName), col="black", lty=1, 
+            position = position_dodge(width=0.4))+
+  geom_point(aes(group=SubIDName), col="black", shape=21,
+             position = position_dodge(width=0.4))+
+  #stat_smooth(method = "lm", formula=y~x+I(x^2)+I(x^3),
+  #            alpha=0.5, se=FALSE, lwd=1)+
+  scale_x_continuous(name = "Weeks Post-Stroke", limits=c(0,26)) +
+  scale_y_continuous(name = "ARAT (Affected Arm)", limits=c(0,60),
+                     breaks = c(seq(0,60,10))) +
+  #facet_wrap(~enrollTime, scales="free")+
+  theme_bw()+
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(size=8, face="bold"),
+        legend.position = "none")
+
+
 
 
 # Change in FM UE for a single subject ----
-ggplot(data=ACUTE %>% 
+S1_FM <- ggplot(data=ACUTE %>% 
          filter(SubIDName=="PMC8442937_049"), 
        aes(x=WeeksPostStroke, y=UEFuglMeyer))+
   geom_line(aes(group=SubIDName), col="black", lty=1, 
@@ -767,32 +807,46 @@ ggplot(data=ACUTE %>%
                      breaks = c(seq(0,70,10))) +
   #facet_wrap(~enrollTime, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=8, face="bold"),
         legend.position = "none")
 
-ggsave(
-  filename="./outputs/change_in_fuglMeyer_singleSubject_B.jpeg",
-  plot = last_plot(),
-  width = 3,
-  height = 2.5,
-  units = "in",
-  dpi = 300
-)
 
+S2_FM <- ggplot(data=ACUTE %>% 
+                  filter(SubIDName=="PMC8442937_017"), 
+                aes(x=WeeksPostStroke, y=UEFuglMeyer))+
+  geom_line(aes(group=SubIDName), col="black", lty=1, 
+            position = position_dodge(width=0.4))+
+  geom_point(aes(group=SubIDName), col="black", shape=21,
+             position = position_dodge(width=0.4))+
+  #stat_smooth(method = "lm", formula=y~x+I(x^2)+I(x^3),
+  #            alpha=0.5, se=FALSE, lwd=1)+
+  scale_x_continuous(name = "Weeks Post-Stroke", limits=c(0,26)) +
+  scale_y_continuous(name = "Fugl-Meyer UE", limits=c(0,70),
+                     breaks = c(seq(0,70,10))) +
+  #facet_wrap(~enrollTime, scales="free")+
+  theme_bw()+
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(size=8, face="bold"),
+        legend.position = "none")
 
 
 
 
 # Change in use ratio for single subject ----
 unique(ACUTE$SubIDName)
-ggplot(data=ACUTE %>% 
-         filter(SubIDName=="PMC8442937_017"), 
+S1_UR <- ggplot(data=ACUTE %>% 
+         filter(SubIDName=="PMC8442937_049"), 
        aes(x=WeeksPostStroke, y=use_ratio))+
   geom_line(aes(group=SubIDName), col="black", lty=1, 
             position = position_dodge(width=0.4))+
@@ -804,23 +858,61 @@ ggplot(data=ACUTE %>%
   scale_y_continuous(name = "Use Ratio (par/non-par)", limits=c(0,1)) +
   #facet_wrap(~enrollTime, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"), 
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=8, face="bold"),
         legend.position = "none")
 
+S2_UR <- ggplot(data=ACUTE %>% 
+                  filter(SubIDName=="PMC8442937_017"), 
+                aes(x=WeeksPostStroke, y=use_ratio))+
+  geom_line(aes(group=SubIDName), col="black", lty=1, 
+            position = position_dodge(width=0.4))+
+  geom_point(aes(group=SubIDName), col="black", shape=21,
+             position = position_dodge(width=0.4))+
+  #stat_smooth(method = "lm", formula=y~x+I(x^2)+I(x^3),
+  #            alpha=0.5, se=FALSE, lwd=1)+
+  scale_x_continuous(name = "Weeks Post Stroke", limits=c(0,26)) +
+  scale_y_continuous(name = "Use Ratio (par/non-par)", limits=c(0,1)) +
+  #facet_wrap(~enrollTime, scales="free")+
+  theme_bw()+
+  theme(axis.text=element_text(size=8, color="black"), 
+        legend.text=element_text(size=8, color="black"),
+        legend.title=element_text(size=8, face="bold"),
+        axis.title=element_text(size=8, face="bold"),
+        plot.title=element_text(size=8, face="bold", hjust=0.5),
+        panel.grid.minor = element_blank(),
+        strip.text = element_text(size=8, face="bold"),
+        legend.position = "none")
+
+# Figure 1B --------------------------------------------------------------------
+Fig1B <- S2_ARAT/S2_FM/S2_UR
+
+# Figure 1C --------------------------------------------------------------------
+Fig1C <- S1_ARAT/S1_FM/S1_UR
+
+# Figure 1 ---------------------------------------------------------------------
+(Fig1A_wrapped <- wrap_elements(Fig1A))
+(Fig1B_wrapped <- wrap_elements(Fig1B))
+(Fig1C_wrapped <- wrap_elements(Fig1C))
+
+(Fig1A_wrapped | Fig1B_wrapped | Fig1C_wrapped) +
+  plot_layout(widths = c(2, 1.5, 1.5)) +
+  plot_annotation(tag_levels = 'A')
+
 ggsave(
-  filename="./outputs/change_in_useRatio_singleSubject_A.jpeg",
+  filename="./paper/Figure1.pdf",
   plot = last_plot(),
-  width = 3,
-  height = 2.5,
+  width = 8,
+  height = 6,
   units = "in",
-  dpi = 300
+  dpi = 600
 )
+
 
 
 
@@ -1690,7 +1782,7 @@ COEFS_WIDE <- merge(x=COEFS_WIDE,
                     by.x="subID",
                     by.y="SubIDName")
 
-ggplot(data=COEFS_WIDE)+
+ARAT_splines<-ggplot(data=COEFS_WIDE)+
   geom_segment(aes(group=subID,
                    x = 0, 
                    y = ARAT_atTime0, 
@@ -1717,28 +1809,28 @@ ggplot(data=COEFS_WIDE)+
                      breaks = c(seq(0,60,10))) +
   #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"),
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"),
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "none")
 
 ggsave(
   filename="./outputs/ARAT_splnes.jpeg",
-  plot = last_plot(),
+  plot = ARAT_splines,
   width = 4,
   height = 2.5,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
 # Figure 4B : FM Splines ----
 head(COEFS_WIDE)
-ggplot(data=COEFS_WIDE)+
+FM_splines<-ggplot(data=COEFS_WIDE)+
   geom_segment(aes(group=subID,
                    x = 0, 
                    y = FM_atTime0, 
@@ -1765,22 +1857,22 @@ ggplot(data=COEFS_WIDE)+
                      breaks = c(seq(0,70,10))) +
   #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"),
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"),
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "none")
 
 ggsave(
   filename="./outputs/FM_splines.jpeg",
-  plot = last_plot(),
+  plot = FM_splines,
   width = 4,
   height = 2.5,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
@@ -1788,7 +1880,7 @@ ggsave(
 
 # Figure 4C : UR Splines ----
 head(COEFS_WIDE)
-ggplot(data=COEFS_WIDE)+
+UR_splines<-ggplot(data=COEFS_WIDE)+
   geom_segment(aes(group=subID,
                    x = 0, 
                    y = UR_atTime0, 
@@ -1815,29 +1907,39 @@ ggplot(data=COEFS_WIDE)+
                      breaks = c(seq(0,1.4,0.2))) +
   #facet_wrap(~StrokeType, scales="free")+
   theme_bw()+
-  theme(axis.text=element_text(size=12, color="black"),
-        legend.text=element_text(size=12, color="black"),
-        legend.title=element_text(size=12, face="bold"),
-        axis.title=element_text(size=12, face="bold"),
-        plot.title=element_text(size=12, face="bold", hjust=0.5),
+  theme(axis.text=element_text(size=10, color="black"),
+        legend.text=element_text(size=10, color="black"),
+        legend.title=element_text(size=10, face="bold"),
+        axis.title=element_text(size=10, face="bold"),
+        plot.title=element_text(size=10, face="bold", hjust=0.5),
         panel.grid.minor = element_blank(),
-        strip.text = element_text(size=12, face="bold"),
+        strip.text = element_text(size=10, face="bold"),
         legend.position = "none")
 
 ggsave(
   filename="./outputs/UR_splines.jpeg",
-  plot = last_plot(),
+  plot = UR_splines,
   width = 4,
   height = 2.5,
   units = "in",
-  dpi = 300
+  dpi = 150
 )
 
 
+# Figure 4 ---------------------------------------------------------------------
+(ARAT_splines/FM_splines/UR_splines) + plot_annotation(tag_levels = 'A')
+
+ggsave(
+  filename="./paper/Figure4.pdf",
+  plot = last_plot(),
+  width = 3,
+  height = 6,
+  units = "in",
+  dpi = 600
+)
 
 
-
-# Figure 5: Density and covariance of different parameters ----
+# Density and covariance of different parameters ----
 colnames(COEFS_WIDE)
 
 # format control
@@ -1945,7 +2047,7 @@ ARAT00 <- ggplot(data=COEFS_WIDE,
 
 ARAT05 <- ggplot(data=COEFS_WIDE,
        aes(x=ARAT_SlopeAt05))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "ARAT Slopes", limits=c(-2, 15)) +
   scale_y_continuous(name = "Count") +
@@ -1954,18 +2056,20 @@ ARAT05 <- ggplot(data=COEFS_WIDE,
 
 ARAT11 <- ggplot(data=COEFS_WIDE,
        aes(x=ARAT_SlopeAt11))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "ARAT Slopes", limits=c(-2, 15)) +
   scale_y_continuous(name = "Count") +
   theme_bw()+
   theme(eval(panel_settings))
 
-ARAT00/ARAT05/ARAT11
+
+# Start here ------------
+ARAT_slopes <- ARAT00/ARAT05/ARAT11
 
 ggsave(
   filename="./outputs/arat_slopes.jpeg",
-  plot = last_plot(),
+  plot = ARAT_slopes,
   width = 2.5,
   height = 6,
   units = "in",
@@ -1986,7 +2090,7 @@ FM00 <- ggplot(data=COEFS_WIDE,
 
 FM05 <- ggplot(data=COEFS_WIDE,
                aes(x=FM_SlopeAt05))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "FMUE Slopes", limits=c(-1, 8)) +
   scale_y_continuous(name = "Count") +
@@ -1996,18 +2100,18 @@ FM05 <- ggplot(data=COEFS_WIDE,
 
 FM11 <- ggplot(data=COEFS_WIDE,
                aes(x=FM_SlopeAt11))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "FMUE Slopes", limits=c(-1, 8)) +
   scale_y_continuous(name = "Count") +
   theme_bw()+
   theme(eval(panel_settings))
 
-FM00/FM05/FM11
+FM_slopes <- FM00/FM05/FM11
 
 ggsave(
   filename="./outputs/fmue_slopes.jpeg",
-  plot = last_plot(),
+  plot = FM_slopes,
   width = 2.5,
   height = 6,
   units = "in",
@@ -2031,7 +2135,7 @@ UR00 <- ggplot(data=COEFS_WIDE,
 
 UR05 <- ggplot(data=COEFS_WIDE,
                aes(x=UR_SlopeAt05))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "Use Ratio Slopes", limits=c(-0.05,0.15)) +
   scale_y_continuous(name = "Count") +
@@ -2040,23 +2144,42 @@ UR05 <- ggplot(data=COEFS_WIDE,
 
 UR11 <- ggplot(data=COEFS_WIDE,
                aes(x=UR_SlopeAt11))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "Use Ratio Slopes", limits=c(-0.05,0.15)) +
   scale_y_continuous(name = "Count") +
   theme_bw()+
   theme(eval(panel_settings))
 
-UR00/UR05/UR11
+UR_slopes <- UR00/UR05/UR11
 
 ggsave(
   filename="./outputs/useRatio_slopes.jpeg",
-  plot = last_plot(),
+  plot = UR_slopes,
   width = 2.5,
   height = 6,
   units = "in",
   dpi = 150
 )
+
+
+# Figure 5 ---------------------------------------------------------------------
+(Fig5A_wrapped <- wrap_elements(ARAT_slopes))
+(Fig5B_wrapped <- wrap_elements(FM_slopes))
+(Fig5C_wrapped <- wrap_elements(UR_slopes))
+
+(Fig5A_wrapped | Fig5B_wrapped | Fig5C_wrapped) +
+  plot_annotation(tag_levels = 'A')
+
+ggsave(
+  filename="./paper/Figure5.pdf",
+  plot = last_plot(),
+  width = 7,
+  height = 5,
+  units = "in",
+  dpi = 600
+)
+
 
 
 # Week 0 Slopes ----------------------------------------------------------------
@@ -2223,68 +2346,7 @@ ggsave(
 
 
 
-# Correlations among parameters from the same model ----------
-colnames(COEFS_WIDE)
-ggpairs(COEFS_WIDE %>% select(-subID),
-        columns = c("ARAT_atTime0", "ARAT_SlopeAt0",
-                    "ARAT_knot05", "ARAT_knot11"),
-        mapping = ggplot2::aes(alpha=0.5),
-        lower = list(continuous = wrap("points", shape=21)),
-        upper = list(continuous = wrap("cor", size = 5)),
-        diag = list(continuous = "densityDiag", discrete = "barDiag", na = "naDiag"))+
-  theme_bw()+scale_color_manual(values=cbPalette)+
-  scale_fill_manual(values=cbPalette)
 
-ggsave(
-  filename="./outputs/correlations_ARAT.jpeg",
-  plot = last_plot(),
-  width = 6,
-  height = 5,
-  units = "in",
-  dpi = 150
-)
-
-
-ggpairs(COEFS_WIDE %>% select(-subID),
-        columns = c("FM_atTime0", "FM_SlopeAt0",
-                    "FM_knot05", "FM_knot11"),
-        mapping = ggplot2::aes(alpha=0.5),
-        lower = list(continuous = wrap("points", shape=21)),
-        upper = list(continuous = wrap("cor", size = 5)),
-        diag = list(continuous = "densityDiag", discrete = "barDiag", na = "naDiag"))+
-  theme_bw()+scale_color_manual(values=cbPalette)+
-  scale_fill_manual(values=cbPalette)
-
-ggsave(
-  filename="./outputs/correlations_FM.jpeg",
-  plot = last_plot(),
-  width = 6,
-  height = 5,
-  units = "in",
-  dpi = 150
-)
-
-
-
-
-ggpairs(COEFS_WIDE %>% select(-subID),
-        columns = c("UR_atTime0", "UR_SlopeAt0",
-                    "UR_knot05", "UR_knot11"),
-        mapping = ggplot2::aes(alpha=0.5),
-        lower = list(continuous = wrap("points", shape=21)),
-        upper = list(continuous = wrap("cor", size = 5)),
-        diag = list(continuous = "densityDiag", discrete = "barDiag", na = "naDiag"))+
-  theme_bw()+scale_color_manual(values=cbPalette)+
-  scale_fill_manual(values=cbPalette)
-
-ggsave(
-  filename="./outputs/correlations_UR.jpeg",
-  plot = last_plot(),
-  width = 6,
-  height = 5,
-  units = "in",
-  dpi = 150
-)
 
 
 
