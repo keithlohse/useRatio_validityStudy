@@ -2041,25 +2041,25 @@ ARAT00 <- ggplot(data=COEFS_WIDE,
   geom_histogram(fill=cbPalette[3], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "ARAT Slopes", limits=c(-2, 15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "Week 0") +
   theme_bw()+
   theme(eval(panel_settings))
 
 ARAT05 <- ggplot(data=COEFS_WIDE,
        aes(x=ARAT_SlopeAt05))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "ARAT Slopes", limits=c(-2, 15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "Week 5") +
   theme_bw()+
   theme(eval(panel_settings))
 
 ARAT11 <- ggplot(data=COEFS_WIDE,
        aes(x=ARAT_SlopeAt11))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "ARAT Slopes", limits=c(-2, 15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "Week 11") +
   theme_bw()+
   theme(eval(panel_settings))
 
@@ -2084,26 +2084,26 @@ FM00 <- ggplot(data=COEFS_WIDE,
   geom_histogram(fill=cbPalette[3], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "FMUE Slopes", limits=c(-1, 8)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
 FM05 <- ggplot(data=COEFS_WIDE,
                aes(x=FM_SlopeAt05))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "FMUE Slopes", limits=c(-1, 8)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
 
 FM11 <- ggplot(data=COEFS_WIDE,
                aes(x=FM_SlopeAt11))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "FMUE Slopes", limits=c(-1, 8)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
@@ -2129,25 +2129,25 @@ UR00 <- ggplot(data=COEFS_WIDE,
   geom_histogram(fill=cbPalette[3], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "Use Ratio Slopes", limits=c(-0.05,0.15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
 UR05 <- ggplot(data=COEFS_WIDE,
                aes(x=UR_SlopeAt05))+
-  geom_histogram(fill=cbPalette[2], col="black", lty=1,
+  geom_histogram(fill=cbPalette[4], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "Use Ratio Slopes", limits=c(-0.05,0.15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
 UR11 <- ggplot(data=COEFS_WIDE,
                aes(x=UR_SlopeAt11))+
-  geom_histogram(fill=cbPalette[4], col="black", lty=1,
+  geom_histogram(fill=cbPalette[2], col="black", lty=1,
                  position = position_dodge(width=0.4))+
   scale_x_continuous(name = "Use Ratio Slopes", limits=c(-0.05,0.15)) +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "") +
   theme_bw()+
   theme(eval(panel_settings))
 
